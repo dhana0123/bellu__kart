@@ -16,6 +16,7 @@ export const products = pgTable("products", {
   originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
   category: text("category").notNull(), // wellness, skincare, electronics
   image: text("image").notNull(),
+  images: text("images").array().default([]),
   deliveryTime: integer("delivery_time").notNull(), // in minutes
   stock: integer("stock").notNull().default(0),
   discount: integer("discount").default(0), // percentage

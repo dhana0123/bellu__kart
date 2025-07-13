@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, Plus, Minus, Clock, Star, Shield, Truck } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Clock, Star, Shield, Truck, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,103 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
 import FloatingCart from "@/components/floating-cart";
 import type { Product } from "@shared/schema";
+
+// Product Image Gallery Component
+function ProductImageGallery({ images, alt, badge }: { images: string[], alt: string, badge?: string }) {
+  const [currentImage, setCurrentImage] = useState(0);
+
+  const getBadgeVariant = (badge: string) => {
+    switch (badge.toLowerCase()) {
+      case 'new': return 'bg-blue-500 text-white';
+      case 'trending': return 'bg-orange-500 text-white';
+      case 'bestseller': return 'bg-purple-500 text-white';
+      case 'low stock': return 'bg-red-500 text-white';
+      default: return 'bg-green-500 text-white';
+    }
+  };
+
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Main Image */}
+      <div className="relative">
+        <img
+          src={images[currentImage]}
+          alt={alt}
+          className="w-full h-96 object-cover rounded-xl shadow-lg"
+        />
+        {badge && (
+          <Badge className={`absolute top-4 left-4 ${getBadgeVariant(badge)}`}>
+            {badge}
+          </Badge>
+        )}
+        
+        {/* Navigation Arrows */}
+        {images.length > 1 && (
+          <>
+            <Button
+              onClick={prevImage}
+              variant="outline"
+              size="icon"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={nextImage}
+              variant="outline"
+              size="icon"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </>
+        )}
+
+        {/* Image Indicators */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            {images.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full cursor-pointer transition-colors ${
+                  index === currentImage ? 'bg-white' : 'bg-white/50'
+                }`}
+                onClick={() => setCurrentImage(index)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnail Images */}
+      {images.length > 1 && (
+        <div className="flex space-x-2 overflow-x-auto">
+          {images.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt={`${alt} ${index + 1}`}
+              className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-all ${
+                index === currentImage 
+                  ? 'ring-2 ring-primary opacity-100' 
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+              onClick={() => setCurrentImage(index)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductDetails() {
   const [, params] = useRoute("/product/:id");
@@ -126,21 +223,12 @@ export default function ProductDetails() {
         </Link>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Product Image */}
-          <div className="space-y-4">
-            <div className="relative">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-96 object-cover rounded-xl shadow-lg"
-              />
-              {product.badges.length > 0 && (
-                <Badge className={`absolute top-4 left-4 ${getBadgeVariant(product.badges[0])}`}>
-                  {product.badges[0]}
-                </Badge>
-              )}
-            </div>
-          </div>
+          {/* Product Image Gallery */}
+          <ProductImageGallery 
+            images={product.images && product.images.length > 0 ? product.images : [product.image]} 
+            alt={product.name}
+            badge={product.badges && product.badges.length > 0 ? product.badges[0] : undefined}
+          />
 
           {/* Product Info */}
           <div className="space-y-6">
