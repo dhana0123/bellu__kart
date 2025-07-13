@@ -42,7 +42,7 @@ export default function Header() {
               >
                 <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
                 <span className="text-sm font-medium text-foreground">Delivering to</span>
-                <span className="text-sm font-semibold text-primary">{address.split(',')[0]}</span>
+                <span className="text-sm font-semibold text-primary max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">{address.split(',')[0]}</span>
                 <MapPin className="w-4 h-4 text-muted-foreground ml-1" />
               </button>
               <div className="bg-[hsl(var(--trust))]/10 text-[hsl(var(--trust))] px-3 py-2 rounded-lg">
@@ -95,7 +95,7 @@ export default function Header() {
               <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
               <MapPin className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Delivering to</span>
-              <span className="text-sm font-semibold text-primary">{address}</span>
+              <span className="text-sm font-semibold text-primary line-clamp-2 max-w-[200px] overflow-hidden text-ellipsis">{address}</span>
             </div>
             <div className="bg-[hsl(var(--trust))]/10 text-[hsl(var(--trust))] px-2 py-1 rounded text-xs font-semibold">
               ⚡ {estimatedTime}
