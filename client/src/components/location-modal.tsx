@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Navigation, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,18 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
+/// <reference types="vite/client" />
+
 // Google Maps API type declarations
 declare global {
   interface Window {
     google: any;
+  }
+  interface ImportMetaEnv {
+    readonly VITE_GOOGLE_MAPS_API_KEY: string;
+  }
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
   }
 }
 
@@ -41,7 +50,6 @@ export default function LocationModal({
   currentAddress,
   onAddressChange,
 }: LocationModalProps) {
-
   const [customAddress, setCustomAddress] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [showMapView, setShowMapView] = useState(false);
@@ -183,18 +191,18 @@ export default function LocationModal({
   };
 
   useEffect(() => {
-    let script: HTMLScriptElement | null = null;
+    const scriptId = "google-maps-script-location-modal";
     let scriptAddedByUs = false;
 
     if (showMapView && isOpen && hasGoogleMapsKey()) {
       // Load Google Maps API if not already loaded
       if (!window.google) {
-        // Check if script is already being loaded
-        const existingScript = document.querySelector(
-          'script[src*="maps.googleapis.com"]',
-        );
-        if (!existingScript) {
+        let script = document.getElementById(
+          scriptId,
+        ) as HTMLScriptElement | null;
+        if (!script) {
           script = document.createElement("script");
+          script.id = scriptId;
           script.src = `https://maps.googleapis.com/maps/api/js?key=${
             import.meta.env.VITE_GOOGLE_MAPS_API_KEY
           }&libraries=places`;
@@ -214,15 +222,17 @@ export default function LocationModal({
           scriptAddedByUs = true;
         }
       } else {
-        // Add a small delay to ensure DOM is ready
         setTimeout(initializeMap, 200);
       }
     }
 
     // Cleanup: remove script if we added it, and clear map instance
     return () => {
-      if (script && scriptAddedByUs && script.parentNode) {
-        script.parentNode.removeChild(script);
+      if (scriptAddedByUs) {
+        const script = document.getElementById(scriptId);
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
       }
       // Remove map instance and marker
       if (mapInstanceRef.current) {
@@ -243,8 +253,6 @@ export default function LocationModal({
       setCustomAddress("");
     }
   };
-
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -291,8 +299,6 @@ export default function LocationModal({
 
           {!showMapView ? (
             <>
-
-
               {/* Manual Address Input */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-3">
@@ -302,8 +308,10 @@ export default function LocationModal({
                   <Input
                     placeholder="Enter your complete address..."
                     value={customAddress}
-                    onChange={(e) => setCustomAddress(e.target.value)}
-                    onKeyPress={(e) =>
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setCustomAddress(e.target.value)
+                    }
+                    onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) =>
                       e.key === "Enter" && handleCustomAddressSubmit()
                     }
                   />
