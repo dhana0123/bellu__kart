@@ -76,7 +76,7 @@ export default function NavbarPincodeChecker() {
         <Button
           variant="outline"
           size="sm"
-          className="hidden sm:flex items-center space-x-2 bg-accent border-primary/20 hover:bg-primary/5"
+          className="flex items-center space-x-2 bg-accent border-primary/20 hover:bg-primary/5"
         >
           <MapPin className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">Check Pincode</span>
