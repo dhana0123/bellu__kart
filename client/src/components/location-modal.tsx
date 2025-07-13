@@ -37,6 +37,8 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
   const [showMapView, setShowMapView] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, address: string} | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
   const { toast } = useToast();
 
   const handleLocationSelect = (location: string) => {
@@ -113,11 +115,21 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
     setCustomAddress(address);
   };
 
+  const cleanupMap = () => {
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+      markerRef.current = null;
+    }
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current = null;
+    }
+  };
+
   const initializeMap = () => {
     if (!mapRef.current || !window.google) return;
 
-    // Clear any existing content in the map container
-    mapRef.current.innerHTML = '';
+    // Clean up existing map and marker
+    cleanupMap();
 
     try {
       const map = new window.google.maps.Map(mapRef.current, {
@@ -127,6 +139,8 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         streetViewControl: false,
         fullscreenControl: false,
       });
+
+      mapInstanceRef.current = map;
 
       // Add click listener to map
       map.addListener('click', (event: any) => {
@@ -142,6 +156,8 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
           map: map,
           draggable: true,
         });
+
+        markerRef.current = marker;
 
         marker.addListener('dragend', (event: any) => {
           const lat = event.latLng.lat();
@@ -172,7 +188,9 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         if (!existingScript) {
           const script = document.createElement('script');
           script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
-          script.onload = initializeMap;
+          script.onload = () => {
+            setTimeout(initializeMap, 100);
+          };
           script.onerror = () => {
             toast({
               title: "Maps unavailable",
@@ -187,6 +205,13 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         setTimeout(initializeMap, 100);
       }
     }
+    
+    // Cleanup function
+    return () => {
+      if (!showMapView || !isOpen) {
+        cleanupMap();
+      }
+    };
   }, [showMapView, isOpen]);
 
   // Separate effect for handling selectedLocation updates
@@ -195,6 +220,13 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
       setTimeout(initializeMap, 100);
     }
   }, [selectedLocation]);
+
+  // Cleanup when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      cleanupMap();
+    }
+  }, [isOpen]);
 
   const handleCustomAddressSubmit = () => {
     if (customAddress.trim()) {
