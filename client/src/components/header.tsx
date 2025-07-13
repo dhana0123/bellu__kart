@@ -65,16 +65,6 @@ export default function Header() {
                 >
                   <LogOut className="w-5 h-5" />
                 </Button>
-              ) : !isAdminRoute ? (
-                <Link href="/admin">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="p-2 rounded-xl border-primary/20 hover:bg-primary/10"
-                  >
-                    <Shield className="w-5 h-5 text-primary" />
-                  </Button>
-                </Link>
               ) : null}
               
               {!isAdminRoute && (
