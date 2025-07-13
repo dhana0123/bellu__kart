@@ -45,8 +45,11 @@ export default function Home() {
       <Header />
       
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/2 to-transparent pointer-events-none -z-10"></div>
+        {/* Top Gradient Overlay - 15% of screen */}
+        <div className="fixed top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-primary/8 via-primary/4 to-transparent pointer-events-none z-10"></div>
+        
+        {/* Bottom Gradient Overlay - 15% of screen */}
+        <div className="fixed bottom-0 left-0 right-0 h-[15vh] bg-gradient-to-t from-primary/8 via-primary/4 to-transparent pointer-events-none z-10"></div>
         {/* Hero Section */}
         <section className="py-6">
           
