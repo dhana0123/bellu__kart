@@ -1,11 +1,18 @@
-import { useState } from "react";
-import { MapPin, Search, Navigation, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { MapPin, Search, Navigation, X, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+
+// Google Maps API type declarations
+declare global {
+  interface Window {
+    google: any;
+  }
+}
 
 interface LocationModalProps {
   isOpen: boolean;
@@ -27,6 +34,9 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
   const [searchQuery, setSearchQuery] = useState("");
   const [customAddress, setCustomAddress] = useState("");
   const [isLocating, setIsLocating] = useState(false);
+  const [showMapView, setShowMapView] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, address: string} | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const handleLocationSelect = (location: string) => {
@@ -38,16 +48,44 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
     onClose();
   };
 
+  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+    // Fallback to coordinates if no API key is available
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+
+    try {
+      // Using Google Maps Geocoding API
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
+      );
+      const data = await response.json();
+      
+      if (data.results && data.results.length > 0) {
+        return data.results[0].formatted_address;
+      }
+      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+  };
+
   const handleCurrentLocation = () => {
     setIsLocating(true);
     
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // In a real app, you'd reverse geocode the coordinates
-          // For now, we'll simulate setting a detected location
-          const detectedLocation = "Current Location, Bangalore";
-          handleLocationSelect(detectedLocation);
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const address = await reverseGeocode(latitude, longitude);
+            setSelectedLocation({ lat: latitude, lng: longitude, address });
+            handleLocationSelect(address);
+          } catch (error) {
+            handleLocationSelect(`${latitude}, ${longitude}`);
+          }
           setIsLocating(false);
         },
         (error) => {
@@ -68,6 +106,72 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
       });
     }
   };
+
+  const handleMapClick = async (lat: number, lng: number) => {
+    const address = await reverseGeocode(lat, lng);
+    setSelectedLocation({ lat, lng, address });
+    setCustomAddress(address);
+  };
+
+  const initializeMap = () => {
+    if (!mapRef.current || !window.google) return;
+
+    const map = new window.google.maps.Map(mapRef.current, {
+      center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
+      zoom: 13,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+    });
+
+    // Add click listener to map
+    map.addListener('click', (event: any) => {
+      const lat = event.latLng.lat();
+      const lng = event.latLng.lng();
+      handleMapClick(lat, lng);
+    });
+
+    // Add marker for selected location
+    let marker: any = null;
+    if (selectedLocation) {
+      marker = new window.google.maps.Marker({
+        position: { lat: selectedLocation.lat, lng: selectedLocation.lng },
+        map: map,
+        draggable: true,
+      });
+
+      marker.addListener('dragend', (event: any) => {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+        handleMapClick(lat, lng);
+      });
+    }
+  };
+
+  const hasGoogleMapsKey = () => {
+    return !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  };
+
+  useEffect(() => {
+    if (showMapView && isOpen && hasGoogleMapsKey()) {
+      // Load Google Maps API if not already loaded
+      if (!window.google) {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.onload = initializeMap;
+        script.onerror = () => {
+          toast({
+            title: "Maps unavailable",
+            description: "Unable to load Google Maps. Please use search instead.",
+            variant: "destructive",
+          });
+        };
+        document.head.appendChild(script);
+      } else {
+        initializeMap();
+      }
+    }
+  }, [showMapView, isOpen, selectedLocation]);
 
   const handleCustomAddressSubmit = () => {
     if (customAddress.trim()) {
@@ -92,6 +196,26 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* View Toggle */}
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => setShowMapView(false)}
+              variant={!showMapView ? "default" : "outline"}
+              className="flex-1 flex items-center space-x-2"
+            >
+              <Search className="w-4 h-4" />
+              <span>Search</span>
+            </Button>
+            <Button
+              onClick={() => setShowMapView(true)}
+              variant={showMapView ? "default" : "outline"}
+              className="flex-1 flex items-center space-x-2"
+            >
+              <Map className="w-4 h-4" />
+              <span>Map</span>
+            </Button>
+          </div>
+
           {/* Current Location Button */}
           <Button
             onClick={handleCurrentLocation}
@@ -102,61 +226,118 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
             <span>{isLocating ? "Detecting location..." : "Use current location"}</span>
           </Button>
 
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search for your area..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          {!showMapView ? (
+            <>
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search for your area..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
 
-          {/* Popular Locations */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Popular Locations</h3>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {filteredLocations.map((location, index) => (
-                <Card
-                  key={index}
-                  className="p-3 cursor-pointer hover:bg-accent border border-gray-100 hover:border-primary/30 transition-colors"
-                  onClick={() => handleLocationSelect(`${location.name}, ${location.area}`)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-sm text-foreground">{location.name}</div>
-                      <div className="text-xs text-muted-foreground">{location.area}</div>
-                    </div>
-                    <Badge className="bg-green-100 text-green-700 text-xs">
-                      ⚡ {location.time}
-                    </Badge>
+              {/* Popular Locations */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Popular Locations</h3>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {filteredLocations.map((location, index) => (
+                    <Card
+                      key={index}
+                      className="p-3 cursor-pointer hover:bg-accent border border-gray-100 hover:border-primary/30 transition-colors"
+                      onClick={() => handleLocationSelect(`${location.name}, ${location.area}`)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-sm text-foreground">{location.name}</div>
+                          <div className="text-xs text-muted-foreground">{location.area}</div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700 text-xs">
+                          ⚡ {location.time}
+                        </Badge>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Manual Address Input */}
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-3">Enter Address Manually</h3>
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Enter your complete address..."
+                    value={customAddress}
+                    onChange={(e) => setCustomAddress(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleCustomAddressSubmit()}
+                  />
+                  <Button
+                    onClick={handleCustomAddressSubmit}
+                    disabled={!customAddress.trim()}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Set This Address
+                  </Button>
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Google Maps View */
+            <div className="space-y-4">
+              {hasGoogleMapsKey() ? (
+                <>
+                  <div className="text-sm text-muted-foreground">
+                    Click on the map to select your delivery location, or drag the marker to adjust.
                   </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+                  
+                  {/* Google Maps Container */}
+                  <div 
+                    ref={mapRef}
+                    className="w-full h-80 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center"
+                  >
+                    {!window.google && (
+                      <div className="text-center">
+                        <Map className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <div className="text-sm text-muted-foreground">Loading Google Maps...</div>
+                      </div>
+                    )}
+                  </div>
 
-          {/* Manual Address Input */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3">Enter Address Manually</h3>
-            <div className="space-y-3">
-              <Input
-                placeholder="Enter your complete address..."
-                value={customAddress}
-                onChange={(e) => setCustomAddress(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleCustomAddressSubmit()}
-              />
-              <Button
-                onClick={handleCustomAddressSubmit}
-                disabled={!customAddress.trim()}
-                variant="outline"
-                className="w-full"
-              >
-                Set This Address
-              </Button>
+                  {/* Selected Location Display */}
+                  {selectedLocation && (
+                    <div className="bg-accent rounded-lg p-3">
+                      <div className="text-xs text-muted-foreground mb-1">Selected location:</div>
+                      <div className="text-sm font-medium text-foreground">{selectedLocation.address}</div>
+                      <Button
+                        onClick={() => handleLocationSelect(selectedLocation.address)}
+                        className="mt-2 w-full"
+                      >
+                        Confirm This Location
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Fallback when Google Maps API key is not available */
+                <div className="text-center py-12">
+                  <Map className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <div className="text-lg font-medium text-foreground mb-2">Google Maps Not Available</div>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Google Maps integration requires an API key. Please use the search tab to find your location.
+                  </div>
+                  <Button
+                    onClick={() => setShowMapView(false)}
+                    variant="outline"
+                  >
+                    Switch to Search
+                  </Button>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Current Address */}
           {currentAddress && (
