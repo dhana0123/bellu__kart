@@ -49,34 +49,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/2 to-transparent pointer-events-none -z-10"></div>
         {/* Hero Section */}
         <section className="py-6">
-          {/* Hero Banner */}
-          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-blue-50 border-primary/20 p-6 mb-6">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-3">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                  Get essentials in <span className="text-primary">10 minutes</span>
-                </h2>
-              </div>
-              <p className="text-muted-foreground text-lg mb-4">Personal care, wellness & daily needs delivered instantly</p>
-              <div className="flex items-center justify-center space-x-6 text-sm">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span className="text-green-700 font-medium">Free Delivery</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-blue-600" />
-                  <span className="text-blue-700 font-medium">100% Authentic</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4 text-orange-600" />
-                  <span className="text-orange-700 font-medium">10 Min Delivery</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+          
 
           {/* Search Bar */}
           <div className="relative mb-4">
