@@ -2,11 +2,13 @@
 
 ## Overview
 
-This is a full-stack e-commerce application for a 10-minute delivery service called "Bellu". The application allows users to browse products across categories (wellness, skincare, electronics), add items to cart, and place orders with various payment methods. It's built with React frontend, Express backend, and uses PostgreSQL with Drizzle ORM for data persistence.
+This is a full-stack e-commerce application for a 10-minute delivery service called "Bellu". The application allows users to browse products across categories (wellness, skincare, electronics), add items to cart, and place orders with various payment methods. It's built with React frontend, Express backend, and uses in-memory storage for data persistence. The design features modern purple gradient buttons (#4D43FE) optimized for both desktop and mobile experiences.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Primary color preference: #4D43FE (modern purple gradient for buttons and cards)
+Design approach: Modern responsive design optimized for both desktop and mobile
 
 ## System Architecture
 
@@ -114,3 +116,11 @@ Preferred communication style: Simple, everyday language.
 - ESLint and Prettier for code quality (implied by setup)
 
 The application follows a traditional full-stack architecture with clear separation between frontend and backend, making it easy to scale and maintain. The use of TypeScript throughout ensures type safety, while the chosen libraries provide a solid foundation for an e-commerce platform.
+
+## Recent Changes
+
+### 2025-01-13: Fixed Product Loading Issue
+- Fixed TypeScript errors in storage.ts for proper type handling
+- Corrected API query structure to use query parameters instead of path parameters
+- Products now load correctly across all categories (wellness, skincare, electronics)
+- Updated color scheme to use #4D43FE primary color for modern look

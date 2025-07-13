@@ -15,7 +15,15 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ["/api/products", selectedCategory],
+    queryKey: ["/api/products", { category: selectedCategory }],
+    queryFn: async () => {
+      const params = selectedCategory === "all" ? "" : `?category=${selectedCategory}`;
+      const response = await fetch(`/api/products${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      return response.json();
+    }
   });
 
   const filteredProducts = products.filter(product =>

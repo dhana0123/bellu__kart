@@ -279,7 +279,15 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = this.currentProductId++;
-    const product: Product = { ...insertProduct, id };
+    const product: Product = { 
+      ...insertProduct, 
+      id,
+      originalPrice: insertProduct.originalPrice ?? null,
+      stock: insertProduct.stock ?? 0,
+      discount: insertProduct.discount ?? null,
+      badges: insertProduct.badges ?? null,
+      inStock: insertProduct.inStock ?? true
+    };
     this.products.set(id, product);
     return product;
   }
@@ -300,13 +308,17 @@ export class MemStorage implements IStorage {
 
   async addToCart(insertItem: InsertCartItem): Promise<CartItem> {
     const id = this.currentCartItemId++;
-    const item: CartItem = { ...insertItem, id };
+    const item: CartItem = { 
+      ...insertItem, 
+      id,
+      quantity: insertItem.quantity ?? 1
+    };
     
     const sessionItems = this.cartItems.get(insertItem.sessionId) || [];
     const existingItemIndex = sessionItems.findIndex(i => i.productId === insertItem.productId);
     
     if (existingItemIndex >= 0) {
-      sessionItems[existingItemIndex].quantity += insertItem.quantity;
+      sessionItems[existingItemIndex].quantity += (insertItem.quantity ?? 1);
     } else {
       sessionItems.push(item);
     }
@@ -342,7 +354,11 @@ export class MemStorage implements IStorage {
   // Orders
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = this.currentOrderId++;
-    const order: Order = { ...insertOrder, id };
+    const order: Order = { 
+      ...insertOrder, 
+      id,
+      status: insertOrder.status ?? "pending"
+    };
     this.orders.set(id, order);
     return order;
   }
