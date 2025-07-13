@@ -25,7 +25,7 @@ export default function CheckoutModal({ isOpen, onClose, total, items }: Checkou
 
   const placeOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      return apiRequest("POST", "/api/orders", orderData);
+      return apiRequest("/api/orders", "POST", orderData);
     },
     onSuccess: () => {
       toast({
