@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/use-cart";
+import { Link } from "wouter";
 import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
@@ -53,13 +54,15 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Card className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-      <div className="relative">
-        <img 
-          src={product.image} 
-          alt={product.name} 
-          className="w-full h-32 object-cover" 
-        />
-      </div>
+      <Link href={`/product/${product.id}`}>
+        <div className="relative cursor-pointer">
+          <img 
+            src={product.image} 
+            alt={product.name} 
+            className="w-full h-32 object-cover" 
+          />
+        </div>
+      </Link>
       
       <div className="p-3">
         <div className="flex items-center justify-between mb-2">
@@ -74,7 +77,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
         
-        <h4 className="font-medium text-sm text-foreground mb-1">{product.name}</h4>
+        <Link href={`/product/${product.id}`}>
+          <h4 className="font-medium text-sm text-foreground mb-1 cursor-pointer hover:text-primary">{product.name}</h4>
+        </Link>
         <p className="text-xs text-muted-foreground mb-2">{product.brand}</p>
         
         <div className="flex items-center justify-between mb-2">

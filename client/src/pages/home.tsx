@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import Header from "@/components/header";
 import CategoryFilters from "@/components/category-filters";
 import ProductCard from "@/components/product-card";
-import CartSidebar from "@/components/cart-sidebar";
+import FloatingCart from "@/components/floating-cart";
 import type { Product } from "@shared/schema";
 
 export default function Home() {
@@ -223,8 +223,8 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Cart Sidebar */}
-      <CartSidebar />
+      {/* Floating Cart */}
+      <FloatingCart />
     </div>
   );
 }
