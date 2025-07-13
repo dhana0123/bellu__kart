@@ -157,7 +157,7 @@ export default function CheckoutModal({ isOpen, onClose, total, items }: Checkou
           <Button
             onClick={handlePlaceOrder}
             disabled={placeOrderMutation.isPending}
-            className="w-full bg-[hsl(var(--trust))] hover:bg-[hsl(var(--trust))]/90 text-white font-semibold py-4 rounded-xl"
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-xl"
           >
             {placeOrderMutation.isPending ? "Placing Order..." : `Place Order - ₹${total.toFixed(0)}`}
           </Button>
