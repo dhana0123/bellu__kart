@@ -115,23 +115,11 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
     setCustomAddress(address);
   };
 
-  const cleanupMap = () => {
-    if (markerRef.current) {
-      markerRef.current.setMap(null);
-      markerRef.current = null;
-    }
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current = null;
-    }
-  };
-
   const initializeMap = () => {
     if (!mapRef.current || !window.google) return;
 
-    // Clean up existing map and marker
-    cleanupMap();
-
     try {
+      // Create new map instance
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
         zoom: 13,
@@ -140,10 +128,11 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         fullscreenControl: false,
       });
 
+      // Store map instance
       mapInstanceRef.current = map;
 
       // Add click listener to map
-      map.addListener('click', (event: any) => {
+      const clickListener = map.addListener('click', (event: any) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
         handleMapClick(lat, lng);
@@ -159,7 +148,7 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
 
         markerRef.current = marker;
 
-        marker.addListener('dragend', (event: any) => {
+        const dragListener = marker.addListener('dragend', (event: any) => {
           const lat = event.latLng.lat();
           const lng = event.latLng.lng();
           handleMapClick(lat, lng);
