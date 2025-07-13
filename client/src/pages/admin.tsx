@@ -17,6 +17,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
 import { Link } from "wouter";
+import ImageUpload from "@/components/image-upload";
 
 export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -459,12 +460,23 @@ export default function Admin() {
 
                 <FormField
                   control={form.control}
-                  name="image"
+                  name="images"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Image URL</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <ImageUpload
+                          images={field.value || []}
+                          onImagesChange={(images) => {
+                            field.onChange(images);
+                            // Set the first image as the primary image
+                            if (images.length > 0) {
+                              form.setValue("image", images[0]);
+                            } else {
+                              form.setValue("image", "");
+                            }
+                          }}
+                          maxImages={5}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
