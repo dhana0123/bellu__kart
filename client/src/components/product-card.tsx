@@ -1,4 +1,4 @@
-import { Plus, Clock } from "lucide-react";
+import { Plus, Minus, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addItem, removeItem, updateQuantity, items } = useCart();
 
   const handleAddToCart = () => {
     addItem({

@@ -46,10 +46,10 @@ export default function Home() {
       
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         {/* Top Gradient Overlay - 15% of screen */}
-        <div className="fixed top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-primary/8 via-primary/4 to-transparent pointer-events-none z-10"></div>
+        <div className="absolute top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-primary/10 via-primary/5 to-transparent pointer-events-none"></div>
         
         {/* Bottom Gradient Overlay - 15% of screen */}
-        <div className="fixed bottom-0 left-0 right-0 h-[15vh] bg-gradient-to-t from-primary/8 via-primary/4 to-transparent pointer-events-none z-10"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[15vh] bg-gradient-to-t from-primary/10 via-primary/5 to-transparent pointer-events-none"></div>
         {/* Hero Section */}
         <section className="py-6">
           
