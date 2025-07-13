@@ -56,7 +56,6 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
           "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
         ],
-        images: null,
         deliveryTime: 8,
         stock: 25,
         discount: 20,
@@ -75,7 +74,6 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1544787219-7f47ccb76574?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
           "https://images.unsplash.com/photo-1597318124338-1d85cf7f4813?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
         ],
-        images: null,
         deliveryTime: 9,
         stock: 30,
         discount: 0,
@@ -94,7 +92,6 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
           "https://images.unsplash.com/photo-1583224864363-6b2c5e9ee5e6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
         ],
-        images: null,
         deliveryTime: 7,
         stock: 3,
         discount: 25,
@@ -113,7 +110,6 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
           "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
         ],
-        images: null,
         deliveryTime: 10,
         stock: 15,
         discount: 19,
@@ -132,7 +128,6 @@ export class MemStorage implements IStorage {
           "https://images.unsplash.com/photo-1576593115481-45e87b3b6a1c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
           "https://images.unsplash.com/photo-1543099201-7b2b23dbcd80?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"
         ],
-        images: null,
         deliveryTime: 6,
         stock: 20,
         discount: 25,

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, Plus, Minus, Clock, Star, Shield, Truck, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Clock, Star, Shield, Truck, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import type { Product } from "@shared/schema";
 // Product Image Gallery Component
 function ProductImageGallery({ images, alt, badge }: { images: string[], alt: string, badge?: string }) {
   const [currentImage, setCurrentImage] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const getBadgeVariant = (badge: string) => {
     switch (badge.toLowerCase()) {
@@ -34,78 +35,178 @@ function ProductImageGallery({ images, alt, badge }: { images: string[], alt: st
     setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  return (
-    <div className="space-y-4">
-      {/* Main Image */}
-      <div className="relative">
-        <img
-          src={images[currentImage]}
-          alt={alt}
-          className="w-full h-96 object-cover rounded-xl shadow-lg"
-        />
-        {badge && (
-          <Badge className={`absolute top-4 left-4 ${getBadgeVariant(badge)}`}>
-            {badge}
-          </Badge>
-        )}
-        
-        {/* Navigation Arrows */}
-        {images.length > 1 && (
-          <>
-            <Button
-              onClick={prevImage}
-              variant="outline"
-              size="icon"
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={nextImage}
-              variant="outline"
-              size="icon"
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </>
-        )}
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'Escape') setIsZoomed(false);
+  };
 
-        {/* Image Indicators */}
+  return (
+    <>
+      <div className="space-y-4">
+        {/* Main Image */}
+        <div className="relative group">
+          <img
+            src={images[currentImage]}
+            alt={alt}
+            className="w-full h-96 object-cover rounded-xl shadow-lg cursor-zoom-in transition-transform duration-300 hover:scale-[1.02]"
+            onClick={() => setIsZoomed(true)}
+            onError={(e) => {
+              // Fallback to first image if current image fails to load
+              if (currentImage > 0) {
+                setCurrentImage(0);
+              }
+            }}
+          />
+          {badge && (
+            <Badge className={`absolute top-4 left-4 z-10 ${getBadgeVariant(badge)}`}>
+              {badge}
+            </Badge>
+          )}
+          
+          {/* Zoom Icon */}
+          <div className="absolute top-4 right-4 bg-black/50 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </div>
+          
+          {/* Navigation Arrows */}
+          {images.length > 1 && (
+            <>
+              <Button
+                onClick={prevImage}
+                variant="outline"
+                size="icon"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={nextImage}
+                variant="outline"
+                size="icon"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </>
+          )}
+
+          {/* Image Counter */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+              {currentImage + 1} / {images.length}
+            </div>
+          )}
+
+          {/* Image Indicators */}
+          {images.length > 1 && images.length <= 5 && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              {images.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-3 h-3 rounded-full cursor-pointer transition-all ${
+                    index === currentImage ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                  onClick={() => setCurrentImage(index)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Thumbnail Images */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {images.map((_, index) => (
+          <div className="flex space-x-3 overflow-x-auto pb-2">
+            {images.map((image, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full cursor-pointer transition-colors ${
-                  index === currentImage ? 'bg-white' : 'bg-white/50'
+                className={`relative flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                  index === currentImage 
+                    ? 'ring-2 ring-primary ring-offset-2 scale-105' 
+                    : 'hover:scale-105 hover:shadow-md'
                 }`}
                 onClick={() => setCurrentImage(index)}
-              />
+              >
+                <img
+                  src={image}
+                  alt={`${alt} ${index + 1}`}
+                  className={`w-20 h-20 object-cover rounded-lg transition-all ${
+                    index === currentImage 
+                      ? 'opacity-100' 
+                      : 'opacity-70 hover:opacity-100'
+                  }`}
+                  onError={(e) => {
+                    // Hide broken thumbnail images
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                {index === currentImage && (
+                  <div className="absolute inset-0 bg-primary/20 rounded-lg"></div>
+                )}
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Thumbnail Images */}
-      {images.length > 1 && (
-        <div className="flex space-x-2 overflow-x-auto">
-          {images.map((image, index) => (
+      {/* Fullscreen Image Modal */}
+      {isZoomed && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setIsZoomed(false)}
+          onKeyDown={handleKeyPress}
+          tabIndex={0}
+        >
+          <div className="relative max-w-full max-h-full">
             <img
-              key={index}
-              src={image}
-              alt={`${alt} ${index + 1}`}
-              className={`w-20 h-20 object-cover rounded-lg cursor-pointer transition-all ${
-                index === currentImage 
-                  ? 'ring-2 ring-primary opacity-100' 
-                  : 'opacity-70 hover:opacity-100'
-              }`}
-              onClick={() => setCurrentImage(index)}
+              src={images[currentImage]}
+              alt={alt}
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
             />
-          ))}
+            
+            {/* Close Button */}
+            <Button
+              onClick={() => setIsZoomed(false)}
+              variant="outline"
+              size="icon"
+              className="absolute top-4 right-4 bg-white/90 hover:bg-white"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+
+            {/* Navigation in fullscreen */}
+            {images.length > 1 && (
+              <>
+                <Button
+                  onClick={prevImage}
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  onClick={nextImage}
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </>
+            )}
+
+            {/* Image counter in fullscreen */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded">
+              {currentImage + 1} / {images.length}
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
