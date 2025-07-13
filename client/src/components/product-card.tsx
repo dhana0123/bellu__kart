@@ -13,6 +13,10 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addItem, removeItem, updateQuantity, items } = useCart();
 
+  // Find current item in cart
+  const cartItem = items.find(item => item.productId === product.id);
+  const quantity = cartItem?.quantity || 0;
+
   const handleAddToCart = () => {
     addItem({
       id: product.id,
@@ -22,6 +26,22 @@ export default function ProductCard({ product }: ProductCardProps) {
       image: product.image,
       deliveryTime: product.deliveryTime,
     });
+  };
+
+  const handleIncrement = () => {
+    if (quantity === 0) {
+      handleAddToCart();
+    } else {
+      updateQuantity(product.id, quantity + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      updateQuantity(product.id, quantity - 1);
+    } else {
+      removeItem(product.id);
+    }
   };
 
   const getBadgeVariant = (badge: string) => {
@@ -89,14 +109,35 @@ export default function ProductCard({ product }: ProductCardProps) {
               <span className="text-xs text-muted-foreground line-through">₹{product.originalPrice}</span>
             )}
           </div>
-          <Button
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            size="icon"
-          >
-            <Plus className="w-4 h-4" />
-          </Button>
+          {quantity === 0 ? (
+            <Button
+              onClick={handleAddToCart}
+              disabled={!product.inStock}
+              className="bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              size="icon"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          ) : (
+            <div className="flex items-center space-x-1">
+              <Button
+                onClick={handleDecrement}
+                className="bg-orange-500 hover:bg-orange-600 text-white p-1 rounded-md transition-colors"
+                size="icon"
+              >
+                <Minus className="w-3 h-3" />
+              </Button>
+              <span className="text-sm font-semibold min-w-[24px] text-center">{quantity}</span>
+              <Button
+                onClick={handleIncrement}
+                disabled={!product.inStock}
+                className="bg-orange-500 hover:bg-orange-600 text-white p-1 rounded-md transition-colors disabled:opacity-50"
+                size="icon"
+              >
+                <Plus className="w-3 h-3" />
+              </Button>
+            </div>
+          )}
         </div>
         
         <div className={`mt-2 ${stockStatus.bg} border ${stockStatus.border} rounded px-2 py-1`}>
