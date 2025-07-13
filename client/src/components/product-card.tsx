@@ -90,7 +90,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <Clock className="w-3 h-3 mr-1" />
             ⚡ {product.deliveryTime} mins
           </Badge>
-          {product.badges.length > 0 && (
+          {product.badges && product.badges.length > 0 && (
             <Badge className={`text-xs px-2 py-1 rounded-full font-medium ${getBadgeVariant(product.badges[0])}`}>
               {product.badges[0]}
             </Badge>
