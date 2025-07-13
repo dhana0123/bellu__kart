@@ -140,3 +140,10 @@ The application follows a traditional full-stack architecture with clear separat
 - Implemented current location detection using browser geolocation
 - Added clickable location area in header for easy address updates
 - Mobile and desktop responsive location selection interface
+
+### 2025-01-13: Pincode Delivery Checker
+- Added functional pincode checker component on homepage
+- Users can verify delivery availability by entering 6-digit pincode
+- Shows service areas, delivery times, and availability status
+- Includes mock data for Bangalore areas with expansion plans
+- Real-time validation and user-friendly error handling

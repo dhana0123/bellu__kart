@@ -8,6 +8,7 @@ import Header from "@/components/header";
 import CategoryFilters from "@/components/category-filters";
 import ProductCard from "@/components/product-card";
 import FloatingCart from "@/components/floating-cart";
+import PincodeChecker from "@/components/pincode-checker";
 import type { Product } from "@shared/schema";
 
 export default function Home() {
@@ -66,17 +67,7 @@ export default function Home() {
           </div>
 
           {/* Pincode Checker */}
-          <Card className="bg-gradient-to-r from-primary/5 to-blue-50 border border-primary/20 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Check delivery availability</p>
-                <p className="text-xs text-muted-foreground">Enter your pincode to confirm 10-min delivery</p>
-              </div>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                Check
-              </Button>
-            </div>
-          </Card>
+          <PincodeChecker />
         </section>
 
         {/* Category Filters */}
