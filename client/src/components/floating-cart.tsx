@@ -15,10 +15,11 @@ export default function FloatingCart() {
     <>
       {/* Floating Cart Tab */}
       <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-4">
-        <Button
-          onClick={toggleCart}
-          className="relative w-full bg-green-500 hover:bg-green-600 text-white rounded-xl px-6 py-4 h-16 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-between"
-        >
+        <div className="max-w-md mx-auto">
+          <Button
+            onClick={toggleCart}
+            className="relative w-full bg-green-500 hover:bg-green-600 text-white rounded-xl px-6 py-4 h-16 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-between"
+          >
           <div className="flex items-center space-x-3">
             <ShoppingCart className="w-6 h-6" />
             <div className="flex flex-col items-start">
@@ -32,7 +33,8 @@ export default function FloatingCart() {
               {itemCount}
             </Badge>
           </div>
-        </Button>
+          </Button>
+        </div>
       </div>
 
       {/* Mini Cart Preview (Optional) */}
