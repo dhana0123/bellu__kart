@@ -44,7 +44,9 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/2 to-transparent pointer-events-none -z-10"></div>
         {/* Hero Section */}
         <section className="py-6">
           <div className="text-center mb-6">
