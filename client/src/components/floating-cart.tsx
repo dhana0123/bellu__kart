@@ -13,28 +13,26 @@ export default function FloatingCart() {
 
   return (
     <>
-      {/* Floating Cart Button */}
+      {/* Floating Cart Tab */}
       <div className="fixed bottom-4 right-4 z-40">
         <Button
           onClick={toggleCart}
-          className="relative bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-          size="icon"
+          className="relative bg-[hsl(var(--trust))] hover:bg-[hsl(var(--trust))]/90 text-white rounded-full px-6 py-3 h-14 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center space-x-3"
         >
-          <ShoppingCart className="w-6 h-6" />
-          <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white rounded-full min-w-[1.5rem] h-6 flex items-center justify-center text-xs font-bold">
+          <ShoppingCart className="w-5 h-5" />
+          <div className="flex flex-col items-start">
+            <span className="text-xs opacity-90">{itemCount} items</span>
+            <span className="text-sm font-semibold">₹{total.toFixed(0)}</span>
+          </div>
+          <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white rounded-full min-w-[1.25rem] h-5 flex items-center justify-center text-xs font-bold">
             {itemCount}
           </Badge>
         </Button>
-        
-        {/* Total Amount Badge */}
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-foreground px-3 py-1 rounded-full shadow-md border text-sm font-semibold whitespace-nowrap">
-          ₹{total.toFixed(0)}
-        </div>
       </div>
 
       {/* Mini Cart Preview (Optional) */}
       {showMiniCart && itemCount > 0 && (
-        <div className="fixed bottom-24 right-4 z-30 bg-white rounded-xl shadow-lg border p-4 min-w-[280px] max-w-sm">
+        <div className="fixed bottom-20 right-4 z-30 bg-white rounded-xl shadow-lg border p-4 min-w-[280px] max-w-sm">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-foreground">Cart Summary</h3>
             <Button
@@ -57,7 +55,7 @@ export default function FloatingCart() {
           
           <Button
             onClick={toggleCart}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full bg-[hsl(var(--trust))] hover:bg-[hsl(var(--trust))]/90 text-white"
             size="sm"
           >
             View Cart

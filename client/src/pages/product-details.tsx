@@ -204,7 +204,7 @@ export default function ProductDetails() {
               <Button
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg font-semibold disabled:opacity-50"
+                className="w-full bg-[hsl(var(--trust))] hover:bg-[hsl(var(--trust))]/90 text-white py-3 text-lg font-semibold disabled:opacity-50"
               >
                 Add to Cart - ₹{(parseFloat(product.price) * quantity).toFixed(0)}
               </Button>

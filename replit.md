@@ -8,7 +8,9 @@ This is a full-stack e-commerce application for a 10-minute delivery service cal
 
 Preferred communication style: Simple, everyday language.
 Primary color preference: #4D43FE (modern purple gradient for buttons and cards)
+Cart color preference: Green (#34C759) for cart-related actions and floating cart
 Design approach: Modern responsive design optimized for both desktop and mobile
+Floating cart style: Horizontal tab with item count and total, not circular button
 
 ## System Architecture
 

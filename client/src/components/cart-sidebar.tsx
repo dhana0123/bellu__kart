@@ -150,7 +150,7 @@ export default function CartSidebar() {
               {/* Checkout Button */}
               <Button
                 onClick={handleCheckout}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-xl"
+                className="w-full bg-[hsl(var(--trust))] hover:bg-[hsl(var(--trust))]/90 text-white font-semibold py-3 rounded-xl"
               >
                 Proceed to Checkout
               </Button>
