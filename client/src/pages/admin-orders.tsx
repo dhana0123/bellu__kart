@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Eye, Package, Truck, CheckCircle } from "lucide-react";
+import { Eye, Package, Truck, CheckCircle, Filter, Calendar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
@@ -16,11 +17,61 @@ import type { Order } from "@shared/schema";
 export default function AdminOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
   const { toast } = useToast();
 
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: ["/api/admin/orders"],
   });
+
+  // Filter orders based on status and date
+  const filteredOrders = useMemo(() => {
+    let filtered = orders;
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(order => order.status === statusFilter);
+    }
+
+    // Filter by date range
+    if (startDate || endDate) {
+      filtered = filtered.filter(order => {
+        const orderDate = parseISO(order.createdAt);
+        const start = startDate ? startOfDay(parseISO(startDate)) : null;
+        const end = endDate ? endOfDay(parseISO(endDate)) : null;
+
+        if (start && end) {
+          return !isBefore(orderDate, start) && !isAfter(orderDate, end);
+        } else if (start) {
+          return !isBefore(orderDate, start);
+        } else if (end) {
+          return !isAfter(orderDate, end);
+        }
+        return true;
+      });
+    }
+
+    // Filter by specific date
+    if (dateFilter) {
+      filtered = filtered.filter(order => {
+        const orderDate = format(parseISO(order.createdAt), "yyyy-MM-dd");
+        return orderDate === dateFilter;
+      });
+    }
+
+    return filtered;
+  }, [orders, statusFilter, startDate, endDate, dateFilter]);
+
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setDateFilter("");
+    setStartDate("");
+    setEndDate("");
+  };
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => 
@@ -98,6 +149,113 @@ export default function AdminOrders() {
             </div>
           </div>
           <p className="text-muted-foreground mt-4">Manage and track all customer orders</p>
+          
+          {/* Filter Controls */}
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Filter className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Filters</span>
+                <Badge variant="secondary">{filteredOrders.length} orders</Badge>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  {showFilters ? "Hide Filters" : "Show Filters"}
+                </Button>
+                {(statusFilter !== "all" || dateFilter || startDate || endDate) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearFilters}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {showFilters && (
+              <Card className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Status Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Status</label>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="preparing">Preparing</SelectItem>
+                        <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Specific Date Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Specific Date</label>
+                    <Input
+                      type="date"
+                      value={dateFilter}
+                      onChange={(e) => {
+                        setDateFilter(e.target.value);
+                        // Clear date range when using specific date
+                        if (e.target.value) {
+                          setStartDate("");
+                          setEndDate("");
+                        }
+                      }}
+                      placeholder="Select date"
+                    />
+                  </div>
+
+                  {/* Start Date Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">From Date</label>
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => {
+                        setStartDate(e.target.value);
+                        // Clear specific date when using range
+                        if (e.target.value) {
+                          setDateFilter("");
+                        }
+                      }}
+                      placeholder="Start date"
+                    />
+                  </div>
+
+                  {/* End Date Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">To Date</label>
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => {
+                        setEndDate(e.target.value);
+                        // Clear specific date when using range
+                        if (e.target.value) {
+                          setDateFilter("");
+                        }
+                      }}
+                      placeholder="End date"
+                    />
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
         </div>
 
         {isLoading ? (
@@ -106,15 +264,20 @@ export default function AdminOrders() {
               <Card key={i} className="h-32 bg-gray-100 animate-pulse" />
             ))}
           </div>
-        ) : orders.length === 0 ? (
+        ) : filteredOrders.length === 0 ? (
           <Card className="p-8 text-center">
             <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Orders Found</h3>
-            <p className="text-muted-foreground">Orders will appear here when customers place them.</p>
+            <p className="text-muted-foreground">
+              {orders.length === 0 
+                ? "Orders will appear here when customers place them."
+                : "No orders match the current filters. Try adjusting your filter criteria."
+              }
+            </p>
           </Card>
         ) : (
           <div className="space-y-4">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <Card key={order.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
