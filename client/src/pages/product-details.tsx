@@ -426,10 +426,10 @@ export default function ProductDetails() {
         {/* Product Details Tabs */}
         <div className="mt-12">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              {/* <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger> */}
             </TabsList>
             
             <TabsContent value="description" className="mt-6">
@@ -455,6 +455,7 @@ export default function ProductDetails() {
               </Card>
             </TabsContent>
             
+            {/* Ingredients and Reviews tabs hidden as requested
             <TabsContent value="ingredients" className="mt-6">
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Key Ingredients</h3>
@@ -526,6 +527,7 @@ export default function ProductDetails() {
                 </div>
               </Card>
             </TabsContent>
+            */}
           </Tabs>
         </div>
       </div>
