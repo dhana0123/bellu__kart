@@ -11,6 +11,15 @@ const categories = [
   { id: "wellness", label: "Wellness" },
   { id: "skincare", label: "Skincare" },
   { id: "electronics", label: "Electronics" },
+  { id: "health", label: "Health & Medicine" },
+  { id: "beauty", label: "Beauty & Personal Care" },
+  { id: "fitness", label: "Fitness & Sports" },
+  { id: "nutrition", label: "Nutrition & Supplements" },
+  { id: "home", label: "Home & Garden" },
+  { id: "baby", label: "Baby & Kids" },
+  { id: "pets", label: "Pet Care" },
+  { id: "books", label: "Books & Stationery" },
+  { id: "grocery", label: "Grocery & Food" },
 ];
 
 export default function CategoryFilters({ selectedCategory, onCategoryChange }: CategoryFiltersProps) {

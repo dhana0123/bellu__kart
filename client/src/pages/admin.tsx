@@ -429,6 +429,15 @@ export default function Admin() {
                           <SelectItem value="wellness">Wellness</SelectItem>
                           <SelectItem value="skincare">Skincare</SelectItem>
                           <SelectItem value="electronics">Electronics</SelectItem>
+                          <SelectItem value="health">Health & Medicine</SelectItem>
+                          <SelectItem value="beauty">Beauty & Personal Care</SelectItem>
+                          <SelectItem value="fitness">Fitness & Sports</SelectItem>
+                          <SelectItem value="nutrition">Nutrition & Supplements</SelectItem>
+                          <SelectItem value="home">Home & Garden</SelectItem>
+                          <SelectItem value="baby">Baby & Kids</SelectItem>
+                          <SelectItem value="pets">Pet Care</SelectItem>
+                          <SelectItem value="books">Books & Stationery</SelectItem>
+                          <SelectItem value="grocery">Grocery & Food</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>
