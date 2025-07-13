@@ -6,6 +6,8 @@ export interface IStorage {
   getProductsByCategory(category: string): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: InsertProduct): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
   updateProductStock(id: number, stock: number): Promise<void>;
 
   // Cart
@@ -19,6 +21,8 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   getOrder(id: number): Promise<Order | undefined>;
   getOrdersBySession(sessionId: string): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
+  updateOrderStatus(id: number, status: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -37,8 +41,9 @@ export class MemStorage implements IStorage {
     this.currentCartItemId = 1;
     this.currentOrderId = 1;
 
-    // Initialize with sample products
+    // Initialize with sample products and orders
     this.initializeProducts();
+    this.initializeSampleOrders();
   }
 
   private initializeProducts() {
@@ -310,6 +315,67 @@ export class MemStorage implements IStorage {
     });
   }
 
+  private initializeSampleOrders() {
+    const sampleOrders = [
+      {
+        sessionId: "user-123",
+        total: "1298",
+        paymentMethod: "UPI",
+        address: "123 MG Road, Koramangala, Bangalore",
+        phone: "+91 9876543210",
+        status: "pending",
+        items: JSON.stringify([
+          { id: 1, name: "Vitamin D3 Tablets", brand: "HealthVit", price: "299", quantity: 2, image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" },
+          { id: 2, name: "Vitamin C Serum", brand: "GlowSkin", price: "699", quantity: 1, image: "https://images.unsplash.com/photo-1570194065650-d99bf4d046f9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" }
+        ]),
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+      },
+      {
+        sessionId: "user-456",
+        total: "1999",
+        paymentMethod: "Credit Card",
+        address: "456 Indiranagar, Bangalore",
+        phone: "+91 8765432109",
+        status: "confirmed",
+        items: JSON.stringify([
+          { id: 8, name: "Bluetooth Earbuds Pro", brand: "SoundMax", price: "2999", quantity: 1, image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" }
+        ]),
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+      },
+      {
+        sessionId: "user-789",
+        total: "899",
+        paymentMethod: "COD",
+        address: "789 Whitefield, Bangalore",
+        phone: "+91 7654321098",
+        status: "delivered",
+        items: JSON.stringify([
+          { id: 3, name: "Hydrating Face Cream", brand: "AquaGlow", price: "699", quantity: 1, image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" },
+          { id: 4, name: "Immunity Tea Pack", brand: "TeaFit", price: "199", quantity: 1, image: "https://images.unsplash.com/photo-1563822249548-9a72b6353cd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" }
+        ]),
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      },
+      {
+        sessionId: "user-101",
+        total: "1599",
+        paymentMethod: "UPI",
+        address: "101 HSR Layout, Bangalore",
+        phone: "+91 6543210987",
+        status: "out_for_delivery",
+        items: JSON.stringify([
+          { id: 7, name: "Power Bank 10000mAh", brand: "TechCharge", price: "1299", quantity: 1, image: "https://images.unsplash.com/photo-1609592704166-2d4c6c6c9b3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" },
+          { id: 5, name: "Retinol Night Cream", brand: "YouthGlow", price: "1299", quantity: 1, image: "https://images.unsplash.com/photo-1570194065650-d99bf4d046f9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300" }
+        ]),
+        createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+      }
+    ];
+
+    sampleOrders.forEach(order => {
+      const id = this.currentOrderId++;
+      this.orders.set(id, { ...order, id });
+    });
+  }
+
   // Products
   async getProducts(): Promise<Product[]> {
     return Array.from(this.products.values());
@@ -415,6 +481,39 @@ export class MemStorage implements IStorage {
 
   async getOrdersBySession(sessionId: string): Promise<Order[]> {
     return Array.from(this.orders.values()).filter(order => order.sessionId === sessionId);
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values()).sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<void> {
+    const order = this.orders.get(id);
+    if (order) {
+      order.status = status;
+    }
+  }
+
+  async updateProduct(id: number, insertProduct: InsertProduct): Promise<Product> {
+    const existingProduct = this.products.get(id);
+    if (!existingProduct) {
+      throw new Error("Product not found");
+    }
+    
+    const updatedProduct: Product = {
+      ...existingProduct,
+      ...insertProduct,
+      id,
+    };
+    
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    this.products.delete(id);
   }
 }
 

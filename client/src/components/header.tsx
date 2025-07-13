@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ShoppingCart, MapPin } from "lucide-react";
+import { ShoppingCart, MapPin, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useLocation } from "@/hooks/use-location";
 import LocationModal from "./location-modal";
 import NavbarPincodeChecker from "./navbar-pincode-checker";
+import { Link } from "wouter";
 
 export default function Header() {
   const { itemCount, toggleCart } = useCart();
@@ -44,9 +45,18 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Pincode Checker & Cart */}
+            {/* Pincode Checker, Admin & Cart */}
             <div className="flex items-center space-x-3">
               <NavbarPincodeChecker />
+              <Link href="/admin">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="p-2 rounded-xl border-primary/20 hover:bg-primary/10"
+                >
+                  <Shield className="w-5 h-5 text-primary" />
+                </Button>
+              </Link>
               <Button
                 onClick={toggleCart}
                 className="relative bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-xl"
