@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useLocation } from "@/hooks/use-location";
 import { useAuth } from "@/hooks/use-auth";
-import LocationModal from "./location-modal-simple";
+import LocationModal from "./location-modal";
 import NavbarPincodeChecker from "./navbar-pincode-checker";
 import { Link, useLocation as useRoute } from "wouter";
 
