@@ -115,10 +115,25 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
     setCustomAddress(address);
   };
 
+  const cleanupMap = () => {
+    try {
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+        markerRef.current = null;
+      }
+      mapInstanceRef.current = null;
+    } catch (error) {
+      console.error('Error cleaning up map:', error);
+    }
+  };
+
   const initializeMap = () => {
     if (!mapRef.current || !window.google) return;
 
     try {
+      // Clean up any existing map first
+      cleanupMap();
+
       // Create new map instance
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
@@ -132,7 +147,7 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
       mapInstanceRef.current = map;
 
       // Add click listener to map
-      const clickListener = map.addListener('click', (event: any) => {
+      map.addListener('click', (event: any) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
         handleMapClick(lat, lng);
@@ -148,7 +163,7 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
 
         markerRef.current = marker;
 
-        const dragListener = marker.addListener('dragend', (event: any) => {
+        marker.addListener('dragend', (event: any) => {
           const lat = event.latLng.lat();
           const lng = event.latLng.lng();
           handleMapClick(lat, lng);
@@ -178,7 +193,7 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
           const script = document.createElement('script');
           script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
           script.onload = () => {
-            setTimeout(initializeMap, 100);
+            setTimeout(initializeMap, 200);
           };
           script.onerror = () => {
             toast({
@@ -191,31 +206,10 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         }
       } else {
         // Add a small delay to ensure DOM is ready
-        setTimeout(initializeMap, 100);
+        setTimeout(initializeMap, 200);
       }
     }
-    
-    // Cleanup function
-    return () => {
-      if (!showMapView || !isOpen) {
-        cleanupMap();
-      }
-    };
-  }, [showMapView, isOpen]);
-
-  // Separate effect for handling selectedLocation updates
-  useEffect(() => {
-    if (showMapView && isOpen && window.google && selectedLocation) {
-      setTimeout(initializeMap, 100);
-    }
-  }, [selectedLocation]);
-
-  // Cleanup when modal is closed
-  useEffect(() => {
-    if (!isOpen) {
-      cleanupMap();
-    }
-  }, [isOpen]);
+  }, [showMapView, isOpen, selectedLocation]);
 
   const handleCustomAddressSubmit = () => {
     if (customAddress.trim()) {
