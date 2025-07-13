@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCart, type CartItem } from "@/hooks/use-cart";
+import { useLocation } from "@/hooks/use-location";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ interface CheckoutModalProps {
 export default function CheckoutModal({ isOpen, onClose, total, items }: CheckoutModalProps) {
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const { sessionId, clearCart } = useCart();
+  const { address, estimatedTime } = useLocation();
   const { toast } = useToast();
 
   const placeOrderMutation = useMutation({
@@ -57,10 +59,10 @@ export default function CheckoutModal({ isOpen, onClose, total, items }: Checkou
       paymentMethod,
       deliveryAddress: {
         name: "John Doe",
-        address: "HSR Layout, Sector 1, Bangalore - 560102",
+        address: address,
         phone: "+91 98765 43210",
       },
-      estimatedDelivery: 10,
+      estimatedDelivery: estimatedTime,
     };
 
     placeOrderMutation.mutate(orderData);
@@ -91,7 +93,7 @@ export default function CheckoutModal({ isOpen, onClose, total, items }: Checkou
                 <MapPin className="w-5 h-5 text-primary mt-1" />
                 <div>
                   <p className="font-medium text-foreground">John Doe</p>
-                  <p className="text-sm text-muted-foreground">HSR Layout, Sector 1, Bangalore - 560102</p>
+                  <p className="text-sm text-muted-foreground">{address}</p>
                   <p className="text-sm text-muted-foreground">+91 98765 43210</p>
                 </div>
               </div>

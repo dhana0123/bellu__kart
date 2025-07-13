@@ -2,11 +2,13 @@ import { X, Minus, Plus, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
+import { useLocation } from "@/hooks/use-location";
 import { useState } from "react";
 import CheckoutModal from "./checkout-modal";
 
 export default function CartSidebar() {
   const { items, isOpen, toggleCart, updateQuantity, removeItem, total, itemCount } = useCart();
+  const { address, estimatedTime } = useLocation();
   const [showCheckout, setShowCheckout] = useState(false);
 
   if (!isOpen) return null;
@@ -115,14 +117,14 @@ export default function CartSidebar() {
                     <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
                     <Clock className="w-4 h-4 text-[hsl(var(--trust))]" />
                     <span className="text-sm font-medium text-[hsl(var(--trust))]">
-                      Delivery in {estimatedDelivery} minutes
+                      Delivery in {estimatedTime}
                     </span>
                   </div>
                   <span className="text-xs text-muted-foreground">Free delivery</span>
                 </div>
                 <div className="flex items-center space-x-2 mt-2">
                   <MapPin className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">HSR Layout, Bangalore</span>
+                  <span className="text-sm text-muted-foreground">{address}</span>
                 </div>
               </Card>
 

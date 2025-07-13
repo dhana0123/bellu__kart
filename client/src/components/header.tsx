@@ -2,12 +2,13 @@ import { useState } from "react";
 import { ShoppingCart, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { useLocation } from "@/hooks/use-location";
 import LocationModal from "./location-modal";
 
 export default function Header() {
   const { itemCount, toggleCart } = useCart();
+  const { address, estimatedTime, setAddress } = useLocation();
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [currentAddress, setCurrentAddress] = useState("HSR Layout, Bangalore");
 
   return (
     <>
@@ -34,11 +35,11 @@ export default function Header() {
               >
                 <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
                 <span className="text-sm font-medium text-foreground">Delivering to</span>
-                <span className="text-sm font-semibold text-primary">{currentAddress.split(',')[0]}</span>
+                <span className="text-sm font-semibold text-primary">{address.split(',')[0]}</span>
                 <MapPin className="w-4 h-4 text-muted-foreground ml-1" />
               </button>
               <div className="bg-[hsl(var(--trust))]/10 text-[hsl(var(--trust))] px-3 py-2 rounded-lg">
-                <span className="text-sm font-semibold">⚡ 8-10 mins</span>
+                <span className="text-sm font-semibold">⚡ {estimatedTime}</span>
               </div>
             </div>
 
@@ -68,10 +69,10 @@ export default function Header() {
               <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
               <MapPin className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Delivering to</span>
-              <span className="text-sm font-semibold text-primary">{currentAddress}</span>
+              <span className="text-sm font-semibold text-primary">{address}</span>
             </div>
             <div className="bg-[hsl(var(--trust))]/10 text-[hsl(var(--trust))] px-2 py-1 rounded text-xs font-semibold">
-              ⚡ 8-10 mins
+              ⚡ {estimatedTime}
             </div>
           </div>
         </button>
@@ -81,8 +82,8 @@ export default function Header() {
       <LocationModal
         isOpen={isLocationModalOpen}
         onClose={() => setIsLocationModalOpen(false)}
-        currentAddress={currentAddress}
-        onAddressChange={setCurrentAddress}
+        currentAddress={address}
+        onAddressChange={setAddress}
       />
     </>
   );
