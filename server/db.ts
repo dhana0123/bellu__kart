@@ -1,5 +1,5 @@
 import { MongoClient, Db, Collection } from 'mongodb';
-import type { Product, CartItem, Order, InsertProduct, InsertCartItem, InsertOrder } from '@shared/schema';
+import type { Product, CartItem, Order, AppConfig, InsertProduct, InsertCartItem, InsertOrder, InsertAppConfig } from '@shared/schema';
 import type { IStorage } from './storage-interface';
 
 const uri = "mongodb+srv://me:1234@m-886829.bzv6ep5.mongodb.net/?retryWrites=true&w=majority&appName=m-886829";
@@ -10,6 +10,7 @@ class MongoStorage implements IStorage {
   private products: Collection<Product> | null = null;
   private cartItems: Collection<CartItem> | null = null;
   private orders: Collection<Order> | null = null;
+  private configs: Collection<AppConfig> | null = null;
 
   constructor() {
     this.client = new MongoClient(uri);
@@ -22,11 +23,13 @@ class MongoStorage implements IStorage {
       this.products = this.db.collection<Product>('products');
       this.cartItems = this.db.collection<CartItem>('cart_items');
       this.orders = this.db.collection<Order>('orders');
+      this.configs = this.db.collection<AppConfig>('app_configs');
       
       console.log('Connected to MongoDB successfully');
       
       // Initialize with sample data if collections are empty
       await this.initializeSampleData();
+      await this.initializeConfigs();
     } catch (error) {
       console.error('Failed to connect to MongoDB:', error);
       throw error;
@@ -469,6 +472,75 @@ class MongoStorage implements IStorage {
   async updateOrderStatus(id: number, status: string): Promise<void> {
     if (!this.orders) throw new Error('Database not connected');
     await this.orders.updateOne({ id }, { $set: { status } });
+  }
+
+  async getAvailableCategories(): Promise<string[]> {
+    if (!this.products) throw new Error('Database not connected');
+    const categories = await this.products.distinct('category');
+    return categories.filter(Boolean);
+  }
+
+  // Configuration Management
+  private async initializeConfigs(): Promise<void> {
+    if (!this.configs) return;
+
+    const configCount = await this.configs.countDocuments();
+    if (configCount === 0) {
+      const defaultConfigs = [
+        {
+          id: 1,
+          key: 'allowed_categories',
+          value: ['wellness', 'skincare', 'electronics', 'health'],
+          description: 'Categories that should be displayed in the frontend'
+        },
+        {
+          id: 2,
+          key: 'allowed_pincodes',
+          value: ['560001', '560002', '560003', '560004', '560005', '560010', '560011', '560012', '560025', '560034', '560037', '560038', '560066', '560068', '560076', '560078', '560087', '560100'],
+          description: 'PIN codes where delivery is available'
+        }
+      ];
+
+      await this.configs.insertMany(defaultConfigs);
+      console.log('Initialized default configurations');
+    }
+  }
+
+  async getConfig(key: string): Promise<AppConfig | undefined> {
+    if (!this.configs) throw new Error('Database not connected');
+    const config = await this.configs.findOne({ key });
+    return config || undefined;
+  }
+
+  async setConfig(config: InsertAppConfig): Promise<AppConfig> {
+    if (!this.configs) throw new Error('Database not connected');
+    
+    const existingConfig = await this.configs.findOne({ key: config.key });
+    
+    if (existingConfig) {
+      const updatedConfig: AppConfig = {
+        ...config,
+        id: existingConfig.id
+      };
+      await this.configs.replaceOne({ key: config.key }, updatedConfig);
+      return updatedConfig;
+    } else {
+      const lastConfig = await this.configs.findOne({}, { sort: { id: -1 } });
+      const nextId = (lastConfig?.id || 0) + 1;
+      
+      const newConfig: AppConfig = {
+        ...config,
+        id: nextId
+      };
+      
+      await this.configs.insertOne(newConfig);
+      return newConfig;
+    }
+  }
+
+  async getAllConfigs(): Promise<AppConfig[]> {
+    if (!this.configs) throw new Error('Database not connected');
+    return await this.configs.find({}).toArray();
   }
 
   async disconnect(): Promise<void> {

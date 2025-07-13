@@ -42,6 +42,13 @@ export const orders = pgTable("orders", {
   estimatedDelivery: integer("estimated_delivery").notNull(), // in minutes
 });
 
+export const appConfig = pgTable("app_config", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: jsonb("value").notNull(),
+  description: text("description"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -52,6 +59,8 @@ export const insertProductSchema = createInsertSchema(products);
 export const insertCartItemSchema = createInsertSchema(cartItems);
 
 export const insertOrderSchema = createInsertSchema(orders);
+
+export const insertAppConfigSchema = createInsertSchema(appConfig);
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -64,3 +73,6 @@ export type CartItem = typeof cartItems.$inferSelect;
 
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
+
+export type InsertAppConfig = z.infer<typeof insertAppConfigSchema>;
+export type AppConfig = typeof appConfig.$inferSelect;

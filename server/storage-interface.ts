@@ -1,4 +1,4 @@
-import type { Product, CartItem, Order, InsertProduct, InsertCartItem, InsertOrder } from "@shared/schema";
+import type { Product, CartItem, Order, AppConfig, InsertProduct, InsertCartItem, InsertOrder, InsertAppConfig } from "@shared/schema";
 
 export interface IStorage {
   // Products
@@ -9,6 +9,7 @@ export interface IStorage {
   updateProduct(id: number, product: InsertProduct): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
   updateProductStock(id: number, stock: number): Promise<void>;
+  getAvailableCategories(): Promise<string[]>;
 
   // Cart
   getCartItems(sessionId: string): Promise<CartItem[]>;
@@ -23,4 +24,9 @@ export interface IStorage {
   getOrdersBySession(sessionId: string): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
   updateOrderStatus(id: number, status: string): Promise<void>;
+
+  // Configuration
+  getConfig(key: string): Promise<AppConfig | undefined>;
+  setConfig(config: InsertAppConfig): Promise<AppConfig>;
+  getAllConfigs(): Promise<AppConfig[]>;
 }

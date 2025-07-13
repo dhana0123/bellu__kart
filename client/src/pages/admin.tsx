@@ -140,13 +140,18 @@ export default function Admin() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-            <div className="flex space-x-4 mt-2">
+            <div className="flex space-x-2 mt-2">
               <Button variant="default" className="bg-primary">
                 Products
               </Button>
               <Link href="/admin/orders">
                 <Button variant="outline">
                   Orders
+                </Button>
+              </Link>
+              <Link href="/admin/config">
+                <Button variant="outline">
+                  Configuration
                 </Button>
               </Link>
             </div>

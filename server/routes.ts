@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCartItemSchema, insertOrderSchema, insertProductSchema } from "@shared/schema";
+import { insertCartItemSchema, insertOrderSchema, insertProductSchema, insertAppConfigSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Products
@@ -183,30 +183,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Pincode checker
+  // Get available categories (from products)
+  app.get("/api/categories", async (req, res) => {
+    try {
+      const categories = await storage.getAvailableCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch categories" });
+    }
+  });
+
+  // Configuration management
+  app.get("/api/admin/config", async (req, res) => {
+    try {
+      const configs = await storage.getAllConfigs();
+      res.json(configs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch configurations" });
+    }
+  });
+
+  app.get("/api/admin/config/:key", async (req, res) => {
+    try {
+      const { key } = req.params;
+      const config = await storage.getConfig(key);
+      
+      if (!config) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      
+      res.json(config);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch configuration" });
+    }
+  });
+
+  app.post("/api/admin/config", async (req, res) => {
+    try {
+      const configData = insertAppConfigSchema.parse(req.body);
+      const config = await storage.setConfig(configData);
+      res.json(config);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid configuration data" });
+    }
+  });
+
+  // Enhanced pincode checker using configuration
   app.post("/api/pincode/check", async (req, res) => {
-    const { pincode } = req.body;
-    
-    // Mock pincode validation - in reality this would check against a delivery area database
-    const validPincodes = [
-      "560001", "560002", "560025", "560029", "560030", "560034", "560035",
-      "560036", "560037", "560038", "560042", "560043", "560047", "560048",
-      "560049", "560050", "560051", "560052", "560053", "560055", "560056",
-      "560061", "560062", "560066", "560068", "560070", "560071", "560072",
-      "560075", "560076", "560078", "560079", "560080", "560083", "560084",
-      "560085", "560087", "560092", "560093", "560094", "560095", "560096",
-      "560097", "560098", "560100", "560102", "560103", "560104", "560107"
-    ];
-    
-    const isServiceable = validPincodes.includes(pincode);
-    
-    res.json({
-      serviceable: isServiceable,
-      estimatedDelivery: isServiceable ? 10 : null,
-      message: isServiceable 
-        ? "Great! We deliver to your area in 10 minutes" 
-        : "Sorry, we don't deliver to this pincode yet"
-    });
+    try {
+      const { pincode } = req.body;
+      
+      // Get allowed pincodes from configuration
+      const pincodeConfig = await storage.getConfig('allowed_pincodes');
+      const allowedPincodes = pincodeConfig?.value as string[] || [];
+      
+      const isServiceable = allowedPincodes.includes(pincode);
+      
+      res.json({
+        serviceable: isServiceable,
+        estimatedDelivery: isServiceable ? 10 : null,
+        area: isServiceable ? "Bangalore" : null,
+        message: isServiceable 
+          ? "Great! We deliver to your area in 10 minutes" 
+          : "Sorry, we don't deliver to this area yet"
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check pincode" });
+    }
   });
 
   const httpServer = createServer(app);

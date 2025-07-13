@@ -137,7 +137,7 @@ export default function AdminOrders() {
         <div className="mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-            <div className="flex space-x-4 mt-2">
+            <div className="flex space-x-2 mt-2">
               <Link href="/admin">
                 <Button variant="outline">
                   Products
@@ -146,6 +146,11 @@ export default function AdminOrders() {
               <Button variant="default" className="bg-primary">
                 Orders
               </Button>
+              <Link href="/admin/config">
+                <Button variant="outline">
+                  Configuration
+                </Button>
+              </Link>
             </div>
           </div>
           <p className="text-muted-foreground mt-4">Manage and track all customer orders</p>

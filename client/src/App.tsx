@@ -9,6 +9,7 @@ import ProductDetails from "@/pages/product-details";
 import Admin from "@/pages/admin";
 import AdminOrders from "@/pages/admin-orders";
 import AdminLogin from "@/pages/admin-login";
+import AdminConfig from "@/pages/admin-config";
 import ProtectedRoute from "@/components/protected-route";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin" component={() => <ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/admin/orders" component={() => <ProtectedRoute><AdminOrders /></ProtectedRoute>} />
+      <Route path="/admin/config" component={() => <ProtectedRoute><AdminConfig /></ProtectedRoute>} />
       <Route component={NotFound} />
     </Switch>
   );

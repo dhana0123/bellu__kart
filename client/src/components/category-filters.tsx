@@ -1,28 +1,55 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
 interface CategoryFiltersProps {
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
 }
 
-const categories = [
-  { id: "all", label: "All Products" },
-  { id: "wellness", label: "Wellness" },
-  { id: "skincare", label: "Skincare" },
-  { id: "electronics", label: "Electronics" },
-  { id: "health", label: "Health & Medicine" },
-  { id: "beauty", label: "Beauty & Personal Care" },
-  { id: "fitness", label: "Fitness & Sports" },
-  { id: "nutrition", label: "Nutrition & Supplements" },
-  { id: "home", label: "Home & Garden" },
-  { id: "baby", label: "Baby & Kids" },
-  { id: "pets", label: "Pet Care" },
-  { id: "books", label: "Books & Stationery" },
-  { id: "grocery", label: "Grocery & Food" },
-];
+// Category display labels mapping
+const categoryLabels: Record<string, string> = {
+  wellness: "Wellness",
+  skincare: "Skincare", 
+  electronics: "Electronics",
+  health: "Health & Medicine",
+  beauty: "Beauty & Personal Care",
+  fitness: "Fitness & Sports",
+  nutrition: "Nutrition & Supplements",
+  home: "Home & Garden",
+  baby: "Baby & Kids",
+  pets: "Pet Care",
+  books: "Books & Stationery",
+  grocery: "Grocery & Food"
+};
 
 export default function CategoryFilters({ selectedCategory, onCategoryChange }: CategoryFiltersProps) {
+  // Fetch available categories from API
+  const { data: availableCategories = [], isLoading } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: () => fetch('/api/categories').then(res => res.json()) as Promise<string[]>
+  });
+
+  if (isLoading) {
+    return (
+      <section className="mb-8">
+        <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
+          <div className="flex-shrink-0 w-20 h-8 bg-gray-200 rounded-xl animate-pulse"></div>
+          <div className="flex-shrink-0 w-24 h-8 bg-gray-200 rounded-xl animate-pulse"></div>
+          <div className="flex-shrink-0 w-28 h-8 bg-gray-200 rounded-xl animate-pulse"></div>
+        </div>
+      </section>
+    );
+  }
+
+  // Build category list with "All" first, then available categories
+  const categories = [
+    { id: "all", label: "All Products" },
+    ...availableCategories.map(cat => ({
+      id: cat,
+      label: categoryLabels[cat] || cat.charAt(0).toUpperCase() + cat.slice(1)
+    }))
+  ];
+
   return (
     <section className="mb-8">
       <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
