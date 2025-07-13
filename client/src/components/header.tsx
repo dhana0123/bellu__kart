@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useLocation } from "@/hooks/use-location";
 import LocationModal from "./location-modal";
+import NavbarPincodeChecker from "./navbar-pincode-checker";
 
 export default function Header() {
   const { itemCount, toggleCart } = useCart();
@@ -43,19 +44,22 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Cart Button */}
-            <Button
-              onClick={toggleCart}
-              className="relative bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-xl"
-              size="icon"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {itemCount}
-                </span>
-              )}
-            </Button>
+            {/* Pincode Checker & Cart */}
+            <div className="flex items-center space-x-3">
+              <NavbarPincodeChecker />
+              <Button
+                onClick={toggleCart}
+                className="relative bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-xl"
+                size="icon"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
 
