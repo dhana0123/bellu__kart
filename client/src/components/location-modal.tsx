@@ -116,34 +116,45 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
   const initializeMap = () => {
     if (!mapRef.current || !window.google) return;
 
-    const map = new window.google.maps.Map(mapRef.current, {
-      center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
-      zoom: 13,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-    });
+    // Clear any existing content in the map container
+    mapRef.current.innerHTML = '';
 
-    // Add click listener to map
-    map.addListener('click', (event: any) => {
-      const lat = event.latLng.lat();
-      const lng = event.latLng.lng();
-      handleMapClick(lat, lng);
-    });
-
-    // Add marker for selected location
-    let marker: any = null;
-    if (selectedLocation) {
-      marker = new window.google.maps.Marker({
-        position: { lat: selectedLocation.lat, lng: selectedLocation.lng },
-        map: map,
-        draggable: true,
+    try {
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
+        zoom: 13,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
       });
 
-      marker.addListener('dragend', (event: any) => {
+      // Add click listener to map
+      map.addListener('click', (event: any) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
         handleMapClick(lat, lng);
+      });
+
+      // Add marker for selected location
+      if (selectedLocation) {
+        const marker = new window.google.maps.Marker({
+          position: { lat: selectedLocation.lat, lng: selectedLocation.lng },
+          map: map,
+          draggable: true,
+        });
+
+        marker.addListener('dragend', (event: any) => {
+          const lat = event.latLng.lat();
+          const lng = event.latLng.lng();
+          handleMapClick(lat, lng);
+        });
+      }
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      toast({
+        title: "Map initialization failed",
+        description: "Please try refreshing the page or use search instead.",
+        variant: "destructive",
       });
     }
   };
@@ -156,22 +167,34 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
     if (showMapView && isOpen && hasGoogleMapsKey()) {
       // Load Google Maps API if not already loaded
       if (!window.google) {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
-        script.onload = initializeMap;
-        script.onerror = () => {
-          toast({
-            title: "Maps unavailable",
-            description: "Unable to load Google Maps. Please use search instead.",
-            variant: "destructive",
-          });
-        };
-        document.head.appendChild(script);
+        // Check if script is already being loaded
+        const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+        if (!existingScript) {
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+          script.onload = initializeMap;
+          script.onerror = () => {
+            toast({
+              title: "Maps unavailable",
+              description: "Unable to load Google Maps. Please use search instead.",
+              variant: "destructive",
+            });
+          };
+          document.head.appendChild(script);
+        }
       } else {
-        initializeMap();
+        // Add a small delay to ensure DOM is ready
+        setTimeout(initializeMap, 100);
       }
     }
-  }, [showMapView, isOpen, selectedLocation]);
+  }, [showMapView, isOpen]);
+
+  // Separate effect for handling selectedLocation updates
+  useEffect(() => {
+    if (showMapView && isOpen && window.google && selectedLocation) {
+      setTimeout(initializeMap, 100);
+    }
+  }, [selectedLocation]);
 
   const handleCustomAddressSubmit = () => {
     if (customAddress.trim()) {
