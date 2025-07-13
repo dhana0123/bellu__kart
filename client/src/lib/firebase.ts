@@ -76,6 +76,11 @@ export const uploadImages = async (files: File[]): Promise<string[]> => {
 
 // Delete image from Firebase Storage
 export const deleteImage = async (imageUrl: string): Promise<void> => {
+  if (!storage) {
+    console.warn('Firebase Storage not initialized. Cannot delete image.');
+    return;
+  }
+  
   try {
     // Extract path from URL
     const url = new URL(imageUrl);

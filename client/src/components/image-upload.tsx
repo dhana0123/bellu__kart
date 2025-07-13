@@ -3,6 +3,7 @@ import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { uploadImages, deleteImage } from "@/lib/firebase";
+import { convertFilesToBase64 } from "@/lib/image-utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface ImageUploadProps {
@@ -53,19 +54,33 @@ export default function ImageUpload({
     setUploading(true);
     
     try {
+      // Try Firebase upload first
       const uploadedUrls = await uploadImages(validFiles);
       onImagesChange([...images, ...uploadedUrls]);
       toast({
         title: "Images uploaded successfully",
-        description: `${uploadedUrls.length} image(s) uploaded`,
+        description: `${uploadedUrls.length} image(s) uploaded to Firebase`,
       });
     } catch (error) {
       console.error("Upload error:", error);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload images. Please try again.",
-        variant: "destructive",
-      });
+      
+      // Fallback to base64 if Firebase fails
+      try {
+        const base64Images = await convertFilesToBase64(validFiles);
+        onImagesChange([...images, ...base64Images]);
+        toast({
+          title: "Images uploaded (fallback mode)",
+          description: `${base64Images.length} image(s) uploaded as base64. Note: Configure Firebase Storage rules for cloud storage.`,
+          variant: "default",
+        });
+      } catch (fallbackError) {
+        console.error("Fallback upload error:", fallbackError);
+        toast({
+          title: "Upload failed",
+          description: "Failed to upload images. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setUploading(false);
       // Reset the input
@@ -78,8 +93,10 @@ export default function ImageUpload({
     const imageUrl = images[index];
     
     try {
-      // Delete from Firebase Storage
-      await deleteImage(imageUrl);
+      // Only try to delete from Firebase if it's not a base64 image
+      if (!imageUrl.startsWith('data:')) {
+        await deleteImage(imageUrl);
+      }
       
       // Remove from local state
       const newImages = images.filter((_, i) => i !== index);
@@ -91,10 +108,14 @@ export default function ImageUpload({
       });
     } catch (error) {
       console.error("Delete error:", error);
+      
+      // Still remove from local state even if Firebase delete fails
+      const newImages = images.filter((_, i) => i !== index);
+      onImagesChange(newImages);
+      
       toast({
-        title: "Delete failed",
-        description: "Failed to delete image. Please try again.",
-        variant: "destructive",
+        title: "Image removed",
+        description: "Image removed from form (Firebase deletion may have failed)",
       });
     } finally {
       setDeletingIndex(null);
