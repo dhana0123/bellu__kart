@@ -115,27 +115,14 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
     setCustomAddress(address);
   };
 
-  const cleanupMap = () => {
-    try {
-      if (markerRef.current) {
-        markerRef.current.setMap(null);
-        markerRef.current = null;
-      }
-      mapInstanceRef.current = null;
-    } catch (error) {
-      console.error('Error cleaning up map:', error);
-    }
-  };
-
   const initializeMap = () => {
     if (!mapRef.current || !window.google) return;
 
     try {
-      // Clean up any existing map first
-      cleanupMap();
-
-      // Create new map instance
-      const map = new window.google.maps.Map(mapRef.current, {
+      // Use a key to force React to recreate the div
+      const mapContainer = mapRef.current;
+      
+      const map = new window.google.maps.Map(mapContainer, {
         center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
         zoom: 13,
         mapTypeControl: false,
@@ -143,17 +130,14 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
         fullscreenControl: false,
       });
 
-      // Store map instance
       mapInstanceRef.current = map;
 
-      // Add click listener to map
       map.addListener('click', (event: any) => {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
         handleMapClick(lat, lng);
       });
 
-      // Add marker for selected location
       if (selectedLocation) {
         const marker = new window.google.maps.Marker({
           position: { lat: selectedLocation.lat, lng: selectedLocation.lng },
@@ -333,6 +317,7 @@ export default function LocationModal({ isOpen, onClose, currentAddress, onAddre
                   
                   {/* Google Maps Container */}
                   <div 
+                    key={`google-map-${showMapView}-${isOpen}`}
                     ref={mapRef}
                     className="w-full h-80 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center"
                   >
