@@ -1,0 +1,70 @@
+import { ShoppingCart, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
+
+export default function Header() {
+  const { itemCount, toggleCart } = useCart();
+
+  return (
+    <>
+      {/* Main Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">B</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">Bellu</h1>
+                <p className="text-xs text-muted-foreground">10-min delivery</p>
+              </div>
+            </div>
+
+            {/* Location & Delivery Time - Hidden on mobile */}
+            <div className="hidden sm:flex items-center space-x-4">
+              <div className="flex items-center space-x-2 bg-accent rounded-lg px-3 py-2">
+                <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
+                <span className="text-sm font-medium text-foreground">Delivering to</span>
+                <span className="text-sm font-semibold text-primary">HSR Layout</span>
+              </div>
+              <div className="bg-[hsl(var(--trust))]/10 text-[hsl(var(--trust))] px-3 py-2 rounded-lg">
+                <span className="text-sm font-semibold">⚡ 8-10 mins</span>
+              </div>
+            </div>
+
+            {/* Cart Button */}
+            <Button
+              onClick={toggleCart}
+              className="relative bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-xl"
+              size="icon"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Location Bar */}
+        <div className="sm:hidden bg-accent border-t border-gray-100 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-[hsl(var(--trust))] rounded-full delivery-pulse"></div>
+              <MapPin className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Delivering to</span>
+              <span className="text-sm font-semibold text-primary">HSR Layout, Bangalore</span>
+            </div>
+            <div className="bg-[hsl(var(--trust))]/10 text-[hsl(var(--trust))] px-2 py-1 rounded text-xs font-semibold">
+              ⚡ 8-10 mins
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
+  );
+}
