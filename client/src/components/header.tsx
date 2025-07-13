@@ -1,16 +1,21 @@
 import { useState } from "react";
-import { ShoppingCart, MapPin, Shield } from "lucide-react";
+import { ShoppingCart, MapPin, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useLocation } from "@/hooks/use-location";
+import { useAuth } from "@/hooks/use-auth";
 import LocationModal from "./location-modal";
 import NavbarPincodeChecker from "./navbar-pincode-checker";
-import { Link } from "wouter";
+import { Link, useLocation as useRoute } from "wouter";
 
 export default function Header() {
   const { itemCount, toggleCart } = useCart();
   const { address, estimatedTime, setAddress } = useLocation();
+  const { isAuthenticated, logout } = useAuth();
+  const [location] = useRoute();
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  
+  const isAdminRoute = location.startsWith('/admin');
 
   return (
     <>
@@ -47,28 +52,45 @@ export default function Header() {
 
             {/* Pincode Checker, Admin & Cart */}
             <div className="flex items-center space-x-3">
-              <NavbarPincodeChecker />
-              <Link href="/admin">
+              {!isAdminRoute && <NavbarPincodeChecker />}
+              {isAdminRoute && isAuthenticated ? (
                 <Button
                   variant="outline"
                   size="icon"
-                  className="p-2 rounded-xl border-primary/20 hover:bg-primary/10"
+                  onClick={() => {
+                    logout();
+                    window.location.href = '/';
+                  }}
+                  className="p-2 rounded-xl border-red-200 hover:bg-red-50 text-red-600"
                 >
-                  <Shield className="w-5 h-5 text-primary" />
+                  <LogOut className="w-5 h-5" />
                 </Button>
-              </Link>
-              <Button
-                onClick={toggleCart}
-                className="relative bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-xl"
-                size="icon"
-              >
+              ) : !isAdminRoute ? (
+                <Link href="/admin">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="p-2 rounded-xl border-primary/20 hover:bg-primary/10"
+                  >
+                    <Shield className="w-5 h-5 text-primary" />
+                  </Button>
+                </Link>
+              ) : null}
+              
+              {!isAdminRoute && (
+                <Button
+                  onClick={toggleCart}
+                  className="relative bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-xl"
+                  size="icon"
+                >
                 <ShoppingCart className="w-6 h-6" />
                 {itemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {itemCount}
                   </span>
                 )}
-              </Button>
+                </Button>
+              )}
             </div>
           </div>
         </div>

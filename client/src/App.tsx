@@ -8,14 +8,17 @@ import Home from "@/pages/home";
 import ProductDetails from "@/pages/product-details";
 import Admin from "@/pages/admin";
 import AdminOrders from "@/pages/admin-orders";
+import AdminLogin from "@/pages/admin-login";
+import ProtectedRoute from "@/components/protected-route";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/product/:id" component={ProductDetails} />
-      <Route path="/admin" component={Admin} />
-      <Route path="/admin/orders" component={AdminOrders} />
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin" component={() => <ProtectedRoute><Admin /></ProtectedRoute>} />
+      <Route path="/admin/orders" component={() => <ProtectedRoute><AdminOrders /></ProtectedRoute>} />
       <Route component={NotFound} />
     </Switch>
   );
