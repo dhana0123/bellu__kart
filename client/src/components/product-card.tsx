@@ -119,19 +119,19 @@ export default function ProductCard({ product }: ProductCardProps) {
               <Plus className="w-4 h-4" />
             </Button>
           ) : (
-            <div className="flex items-center space-x-1">
+            <div className="bg-orange-600 rounded-lg p-1 flex items-center space-x-1">
               <Button
                 onClick={handleDecrement}
-                className="bg-orange-500 hover:bg-orange-600 text-white p-1 rounded-md transition-colors"
+                className="bg-orange-700 hover:bg-orange-800 text-white p-1 rounded-md transition-colors"
                 size="icon"
               >
                 <Minus className="w-3 h-3" />
               </Button>
-              <span className="text-sm font-semibold min-w-[24px] text-center">{quantity}</span>
+              <span className="text-sm font-semibold min-w-[24px] text-center text-white">{quantity}</span>
               <Button
                 onClick={handleIncrement}
                 disabled={!product.inStock}
-                className="bg-orange-500 hover:bg-orange-600 text-white p-1 rounded-md transition-colors disabled:opacity-50"
+                className="bg-orange-700 hover:bg-orange-800 text-white p-1 rounded-md transition-colors disabled:opacity-50"
                 size="icon"
               >
                 <Plus className="w-3 h-3" />
