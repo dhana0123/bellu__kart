@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MapPin, Search, Navigation, X, Map } from "lucide-react";
+import { MapPin, Navigation, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,7 +41,7 @@ export default function LocationModal({
   currentAddress,
   onAddressChange,
 }: LocationModalProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [customAddress, setCustomAddress] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [showMapView, setShowMapView] = useState(false);
@@ -244,11 +244,7 @@ export default function LocationModal({
     }
   };
 
-  const filteredLocations = popularLocations.filter(
-    (location) =>
-      location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      location.area.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -268,8 +264,8 @@ export default function LocationModal({
               variant={!showMapView ? "default" : "outline"}
               className="flex-1 flex items-center space-x-2"
             >
-              <Search className="w-4 h-4" />
-              <span>Search</span>
+              <MapPin className="w-4 h-4" />
+              <span>Address</span>
             </Button>
             <Button
               onClick={() => setShowMapView(true)}
@@ -295,55 +291,12 @@ export default function LocationModal({
 
           {!showMapView ? (
             <>
-              {/* Search Input */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search for your area..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
 
-              {/* Popular Locations */}
-              {/* <div>
-                <h3 className="text-sm font-semibold text-foreground mb-3">
-                  Popular Locations
-                </h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {filteredLocations.map((location, index) => (
-                    <Card
-                      key={index}
-                      className="p-3 cursor-pointer hover:bg-accent border border-gray-100 hover:border-primary/30 transition-colors"
-                      onClick={() =>
-                        handleLocationSelect(
-                          `${location.name}, ${location.area}`,
-                        )
-                      }
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-sm text-foreground">
-                            {location.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {location.area}
-                          </div>
-                        </div>
-                        <Badge className="bg-green-100 text-green-700 text-xs">
-                          ⚡ {location.time}
-                        </Badge>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div> */}
 
               {/* Manual Address Input */}
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-3">
-                  Enter Address Manually
+                  Enter Your Delivery Address
                 </h3>
                 <div className="space-y-3">
                   <Input
